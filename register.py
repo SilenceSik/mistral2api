@@ -31,9 +31,11 @@ class MistralRegistrar:
                  proxy_pool: list = None,
                  workers: int = 1,
                  max_retries: int = 3,
-                 pending_file: str = "pending.jsonl"):
-        self.mail = MailClient(mail_api)
+                 pending_file: str = "pending.jsonl",
+                 mail_domains: list = None):
+        self.mail = MailClient(mail_api, domains=mail_domains or [])
         self.pool = ProxyPool(proxy=proxy, proxy_pool=proxy_pool)
+        self.proxy = proxy
         self.password = password
         self.workers = max(1, workers)
         self.max_retries = max_retries
@@ -235,6 +237,7 @@ def load_config(path: str = "config.json") -> dict:
     """从 config.json 加载配置，不存在则用默认值。"""
     defaults = {
         "mail_api": "http://localhost:8000",
+        "mail_domains": [],
         "proxy": "http://127.0.0.1:7890",
         "proxy_pool": [],
         "password": "ChangeMe123!",
@@ -282,6 +285,7 @@ def main():
         workers=workers,
         max_retries=cfg.get("max_retries", 3),
         pending_file=cfg.get("pending_file", "pending.jsonl"),
+        mail_domains=cfg.get("mail_domains", []),
     )
     registrar.register_batch(count, delay)
 
