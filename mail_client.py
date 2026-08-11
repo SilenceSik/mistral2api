@@ -5,9 +5,9 @@
   {英文名}{6位hex}@{随机子域前缀}.{域名}
 
 示例：
-  aliceadams3ac7bc@my.your-domain-1.xyz
-  sarahwilson3ac849@r2.your-domain-2.top
-  patrickthomas3aca14@8q.your-domain-1.xyz
+  aliceadams3ac7bc@my.example.xyz
+  sarahwilson3ac849@r2.example.top
+  patrickthomas3aca14@8q.example.xyz
 
 英文名池：800+ 个常见英文名组合
 子域前缀：2-3 位随机字母数字（每次随机，避免重复）
