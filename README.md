@@ -1,10 +1,10 @@
 <div align="center">
 
-# mistral-register
+# mistral2api
 
-Mistral AI 批量注册 + API Key 自动创建工具
+Mistral AI 批量注册 + API Key 自动创建 + OpenAI 兼容网关
 
-纯 API · 零浏览器 · 无 Captcha · OpenAI 兼容
+纯 API · 零浏览器 · 无 Captcha
 
 </div>
 
@@ -21,7 +21,7 @@ Mistral AI 批量注册 + API Key 自动创建工具
 | `server.py` | API 网关 — 多 key 轮询 + 429 冷却 + OpenAI 兼容 |
 | `webui.py` | WebUI 管理面板 — key 池状态/注册/API 测试 |
 | `ory_auth.py` | Ory Kratos 身份认证客户端 |
-| `mail_client.py` | 临时邮箱客户端 |
+| `mail_client.py` | 临时邮箱客户端（兼容 cloudflare_temp_email API） |
 | `mistral_api.py` | Mistral 原生 API 封装 |
 | `proxy_pool.py` | 代理池轮换 + 健康检查 |
 | `pending.py` | 断联恢复 — 状态持久化 |
@@ -49,7 +49,7 @@ Mistral AI 批量注册 + API Key 自动创建工具
 
 ## 与同类工具对比
 
-| | grok-register | mistral-register |
+| | grok-register | mistral2api |
 |---|---|---|
 | 浏览器 | Chromium + DrissionPage | **不需要** |
 | Captcha | Turnstile（靠真实浏览器过） | **无** |
@@ -70,8 +70,8 @@ Mistral AI 批量注册 + API Key 自动创建工具
 ### 安装
 
 ```bash
-git clone https://github.com/SilenceDx/mistral-register.git
-cd mistral-register
+git clone https://github.com/SilenceSik/mistral2api.git
+cd mistral2api
 pip install -r requirements.txt
 ```
 
@@ -86,14 +86,11 @@ cp config.example.json config.json
 ```json
 {
   "mail_api": "http://your-mail-server:8000",
+  "mail_domains": ["your-domain-1.xyz", "your-domain-2.top"],
   "proxy": "http://127.0.0.1:7890",
-  "proxy_pool": [
-    "http://127.0.0.1:7890",
-    "http://127.0.0.1:7891",
-    "http://127.0.0.1:7892"
-  ],
+  "proxy_pool": [],
   "password": "YourPassword123!",
-  "register_count": 5,
+  "register_count": 1,
   "delay": 2.0,
   "workers": 1,
   "max_retries": 3,
@@ -106,7 +103,7 @@ cp config.example.json config.json
 
 ### 运行
 
-### 1. 批量注册（CLI）
+#### 1. 批量注册（CLI）
 
 ```bash
 # 注册 1 个账号
@@ -119,7 +116,7 @@ python register.py -n 20 -w 4
 python register.py --resume
 ```
 
-### 2. 启动 API 网关
+#### 2. 启动 API 网关
 
 ```bash
 # 加载 key 文件启动
@@ -129,13 +126,13 @@ python server.py --port 8082 --load-keys accounts_latest.txt
 python server.py --port 8082 --api-keys sk-my-gw-key --proxy http://127.0.0.1:7890
 
 # 客户端使用
-curl http://localhost:8082/v1/chat/completions \\
-  -H "Authorization: Bearer sk-my-gw-key" \\
-  -H "Content-Type: application/json" \\
+curl http://localhost:8082/v1/chat/completions \
+  -H "Authorization: Bearer sk-your-gw-key" \
+  -H "Content-Type: application/json" \
   -d '{"model":"mistral-small-latest","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
-### 3. 启动 WebUI
+#### 3. 启动 WebUI
 
 ```bash
 python webui.py --port 8083 --gateway http://localhost:8082
@@ -192,7 +189,7 @@ Content-Type: application/json
 
 Workspace UUID 从 `console.mistral.ai/api-keys` 的 RSC flight data 中提取。
 
-## 临时邮箱
+### 临时邮箱
 
 需要自建兼容 [cloudflare_temp_email](https://github.com/dreamhunter2333/cloudflare_temp_email) API 的邮箱服务：
 
@@ -200,7 +197,19 @@ Workspace UUID 从 `console.mistral.ai/api-keys` 的 RSC flight data 中提取�
 - `POST /api/token` → `{data: {token}}`
 - `GET /api/messages`（Bearer JWT）→ 邮件列表
 
-自建方案参考 [ai-account-farming skill](../skills/devops/ai-account-farming) 的邮箱部分。
+邮箱服务端需支持 Catch-All 收信和通配符 DNS（`*.domain` MX 记录指向邮件服务器）。
+
+### 邮箱格式
+
+客户端自动生成仿真人邮箱地址：
+
+```
+{英文名}{姓氏}3ac{6位hex}@{2-3位随机前缀}.{域名}
+```
+
+示例：
+- `aliceadams3ac7bc@my.example.xyz`
+- `sarahwilson3ac849@r2.example.top`
 
 ## 可用模型
 
