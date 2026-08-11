@@ -1,10 +1,14 @@
 {
   "mail_api": "http://your-mail-server:8000",
   "proxy": "http://127.0.0.1:7890",
+  "proxy_pool": [],
   "password": "YourPassword123!",
   "register_count": 1,
   "delay": 2.0,
+  "workers": 1,
+  "max_retries": 3,
   "key_name": "auto-bot",
   "first_name": "Bot",
-  "last_name": "User"
+  "last_name": "User",
+  "pending_file": "pending.jsonl"
 }

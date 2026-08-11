@@ -18,6 +18,10 @@ Mistral AI 批量注册 + API Key 自动创建工具
 - **纯 API 注册**：基于 Ory Kratos 身份系统，无需 Chromium / Selenium / Playwright
 - **零 Captcha**：Mistral 注册流程无 Turnstile / hCaptcha / 手机验证
 - **全自动闭环**：临时邮箱 → 注册 → 邮箱验证 → 两步登录 → 创建 API Key → 测试可用性
+- **断联恢复**：每步写 pending.jsonl，中断后重跑自动检测未完成注册
+- **并发注册**：ThreadPoolExecutor 多线程，`-w 4` 开 4 线程同时跑
+- **代理池轮换**：支持多代理地址轮换，每个注册用不同出口 IP
+- **网络重试**：每个 HTTP 请求自动重试 3 次，指数退避（1s→2s→4s）
 - **批量支持**：一键批量注册，自动保存 Key
 - **OpenAI 兼容**：产出的 Key 直接用于 `api.mistral.ai/v1/chat/completions`
 - **依赖极简**：仅需 `requests`，无需浏览器和重量级依赖
@@ -62,12 +66,20 @@ cp config.example.json config.json
 {
   "mail_api": "http://your-mail-server:8000",
   "proxy": "http://127.0.0.1:7890",
+  "proxy_pool": [
+    "http://127.0.0.1:7890",
+    "http://127.0.0.1:7891",
+    "http://127.0.0.1:7892"
+  ],
   "password": "YourPassword123!",
   "register_count": 5,
   "delay": 2.0,
+  "workers": 1,
+  "max_retries": 3,
   "key_name": "auto-bot",
   "first_name": "Bot",
-  "last_name": "User"
+  "last_name": "User",
+  "pending_file": "pending.jsonl"
 }
 ```
 
@@ -79,6 +91,12 @@ python register.py -n 1
 
 # 批量注册 10 个
 python register.py -n 10
+
+# 4 线程并发注册 20 个
+python register.py -n 20 -w 4
+
+# 恢复中断的注册
+python register.py --resume
 
 # 自定义配置
 python register.py -n 5 --proxy http://127.0.0.1:7890 --mail-api http://your-mail:8000
