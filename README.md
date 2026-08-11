@@ -13,6 +13,27 @@ Mistral AI 批量注册 + API Key 自动创建工具
 > [!IMPORTANT]
 > 本项目仅用于自动化流程研究、测试环境验证和个人学习。使用者应自行遵守目标网站服务条款、当地法律法规和第三方服务限制。请勿用于滥用或未经授权的商业用途。
 
+## 组件
+
+| 文件 | 用途 |
+|---|---|
+| `register.py` | 批量注册 + API key 创建（CLI） |
+| `server.py` | API 网关 — 多 key 轮询 + 429 冷却 + OpenAI 兼容 |
+| `webui.py` | WebUI 管理面板 — key 池状态/注册/API 测试 |
+| `ory_auth.py` | Ory Kratos 身份认证客户端 |
+| `mail_client.py` | 临时邮箱客户端 |
+| `mistral_api.py` | Mistral 原生 API 封装 |
+| `proxy_pool.py` | 代理池轮换 + 健康检查 |
+| `pending.py` | 断联恢复 — 状态持久化 |
+
+## 架构
+
+```
+[WebUI :8083] ──管理──→ [Gateway :8082] ──轮询──→ [Mistral API]
+                              ↑
+[register.py] ──产 key──→ KeyPool (内存)
+```
+
 ## 特性
 
 - **纯 API 注册**：基于 Ory Kratos 身份系统，无需 Chromium / Selenium / Playwright
@@ -85,21 +106,40 @@ cp config.example.json config.json
 
 ### 运行
 
+### 1. 批量注册（CLI）
+
 ```bash
 # 注册 1 个账号
 python register.py -n 1
-
-# 批量注册 10 个
-python register.py -n 10
 
 # 4 线程并发注册 20 个
 python register.py -n 20 -w 4
 
 # 恢复中断的注册
 python register.py --resume
+```
 
-# 自定义配置
-python register.py -n 5 --proxy http://127.0.0.1:7890 --mail-api http://your-mail:8000
+### 2. 启动 API 网关
+
+```bash
+# 加载 key 文件启动
+python server.py --port 8082 --load-keys accounts_latest.txt
+
+# 带鉴权 + 代理
+python server.py --port 8082 --api-keys sk-my-gw-key --proxy http://127.0.0.1:7890
+
+# 客户端使用
+curl http://localhost:8082/v1/chat/completions \\
+  -H "Authorization: Bearer sk-my-gw-key" \\
+  -H "Content-Type: application/json" \\
+  -d '{"model":"mistral-small-latest","messages":[{"role":"user","content":"Hello"}]}'
+```
+
+### 3. 启动 WebUI
+
+```bash
+python webui.py --port 8083 --gateway http://localhost:8082
+# 浏览器打开 http://localhost:8083
 ```
 
 ### 输出
