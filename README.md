@@ -199,18 +199,6 @@ Workspace UUID 从 `console.mistral.ai/api-keys` 的 RSC flight data 中提取�
 
 邮箱服务端需支持 Catch-All 收信和通配符 DNS（`*.domain` MX 记录指向邮件服务器）。
 
-### 邮箱格式
-
-客户端自动生成仿真人邮箱地址：
-
-```
-{英文名}{姓氏}3ac{6位hex}@{2-3位随机前缀}.{域名}
-```
-
-示例：
-- `aliceadams3ac7bc@my.example.xyz`
-- `sarahwilson3ac849@r2.example.top`
-
 ## 可用模型
 
 注册后可用的 55+ 模型包括：
