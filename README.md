@@ -86,7 +86,7 @@ cp config.example.json config.json
 ```json
 {
   "mail_api": "http://your-mail-server:8000",
-  "mail_domains": ["your-domain-1.xyz", "your-domain-2.top"],
+  "mail_domains": ["example.com", "example.net"],
   "proxy": "http://127.0.0.1:7890",
   "proxy_pool": [],
   "password": "YourPassword123!",
