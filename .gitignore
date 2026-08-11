@@ -1,0 +1,7 @@
+config.json
+accounts_*.txt
+mistral_keys.txt
+__pycache__/
+*.pyc
+.venv/
+*.log

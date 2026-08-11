@@ -1,0 +1,10 @@
+{
+  "mail_api": "http://your-mail-server:8000",
+  "proxy": "http://127.0.0.1:7890",
+  "password": "YourPassword123!",
+  "register_count": 1,
+  "delay": 2.0,
+  "key_name": "auto-bot",
+  "first_name": "Bot",
+  "last_name": "User"
+}
